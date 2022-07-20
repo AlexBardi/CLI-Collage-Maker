@@ -12,7 +12,6 @@ def main():
     heif_file.mode,
     heif_file.stride,
     )
-    image.show()
 
 if __name__=="__main__":
     main()

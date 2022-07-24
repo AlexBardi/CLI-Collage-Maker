@@ -35,7 +35,7 @@ def main():
     num_vert = int(input("How many images tall? "))
 
     for image_single, name in zip(images, names):
-        image_collage = Image.new("RGB", (image_single.size[0] * num_horiz, image_single.size[1] * num_vert), "white")
+        image_collage = Image.new("RGBA", (image_single.size[0] * num_horiz, image_single.size[1] * num_vert), "white")
 
         for i in range(num_horiz):
             for j in range(num_vert): 

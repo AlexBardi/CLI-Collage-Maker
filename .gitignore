@@ -127,3 +127,10 @@ dmypy.json
 
 # Pyre type checker
 .pyre/
+
+# don't save images
+*.heic 
+*.jpg
+*.gif
+*.png
+*.tga

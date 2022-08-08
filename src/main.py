@@ -1,9 +1,11 @@
+from contextlib import nullcontext
+import re
 import pyheif
 import os, os.path
 from PIL import Image
 import argparse
 
-def import_pics(path, same_size=False):
+def import_pics(path, same_size=False, resize_param=False, new_size=(100,100)):
     imgs = []
     names = []
     valid_images = [".jpg",".gif",".png",".tga"]
@@ -25,7 +27,10 @@ def import_pics(path, same_size=False):
                 heif_file.stride,
             )
 
-            if len(imgs) > 0 and same_size:
+            if resize_param:
+                image = image.resize(new_size)
+
+            elif len(imgs) > 0 and same_size:
                 image = image.resize(imgs[0].size)
 
             imgs.append(image)
@@ -33,13 +38,16 @@ def import_pics(path, same_size=False):
         elif ext.lower() in valid_images:
             image = Image.open(os.path.join(path,f))
 
-            if len(imgs) > 0 and same_size:
+            if resize_param:
+                image = image.resize(new_size)
+
+            elif len(imgs) > 0 and same_size:
                 image = image.resize(imgs[0].size)
 
             imgs.append(image)
 
         else:
-            print("Warning: ", name + ext, " is one of the supported filetypes.")
+            print("Warning:", name + ext, "is not one of the supported filetypes.")
             continue
 
         names.append(name) 
@@ -62,16 +70,17 @@ def singleCollage():
                 image_collage.paste(image_single, (i * image_single.size[0], j * image_single.size[1]))
 
         image_collage.save("./../outputs/" + name + "-" + str(num_horiz) + "x" + str(num_vert) + ".png")
+    
+    return
 
 
 def multiCollage(args):
     print("Put the files that you want to collage in the 'inputs' file.")
     print("Give them all single letter names.")
+    print("If you type 'x', that space will be left blank.")
     print("Write out the pattern of letters that defines your grid:")
 
     grid = []
-
-    images, names = import_pics("./../inputs/", same_size=True)
 
     while (line := input("> ")) != '':
         grid.append(line)
@@ -79,6 +88,12 @@ def multiCollage(args):
             print("Each row must have the same dimensions")
             return
 
+    if args.size == None:
+        images, names = import_pics("./../inputs/", same_size=True)
+    else:
+        images, names = import_pics("./../inputs/", resize_param=True, new_size=args.size)
+
+    print(len(grid))
     if len(grid) == 0:
         return
 
@@ -87,12 +102,11 @@ def multiCollage(args):
 
     image_collage = Image.new("RGBA", (images[0].size[0] * num_horiz, images[0].size[1] * num_vert), "white")
 
-    print(image_collage.size)
-    print(images[1].size)
-
     for i in range(num_horiz):
         for j in range(num_vert): 
             img_name = grid[j][i]
+            if img_name == 'x':
+                continue
             idx = names.index(img_name)
             image_single = images[idx]
             image_collage.paste(image_single, (i * image_single.size[0], j * image_single.size[1]))
@@ -107,14 +121,12 @@ def main():
  
     parser.add_argument("-p", "--pattern", action='store_true',
                         help = "Creating a collage of multiple images")
-    parser.add_argument("-s", "--size", type = str, nargs = 2,
+    parser.add_argument("-s", "--size", type = int, nargs = 2,
                         metavar = ('height','width'), help = "The height and \
                         width of every image in the collage")
 
     args = parser.parse_args()
 
-    print(args)
-     
     if args.pattern == True:
         multiCollage(args)
     else:
@@ -123,3 +135,11 @@ def main():
     
 if __name__=="__main__":
     main()
+
+# aaabccccdd
+# aaabeeeedd
+# gfffgggggg
+# ggggggghhh
+# hhhhhhhhhh
+# hhhhhhhiii
+# iiiiiiiiii

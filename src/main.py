@@ -4,6 +4,7 @@ import pyheif
 import os, os.path
 from PIL import Image
 import argparse
+import os
 
 def import_pics(path, same_size=False, resize_param=False, new_size=(100,100)):
     imgs = []
@@ -75,25 +76,30 @@ def singleCollage():
 
 
 def multiCollage(args):
-    print("Put the files that you want to collage in the 'inputs' file.")
-    print("Give them all single letter names.")
-    print("If you type 'x', that space will be left blank.")
-    print("Write out the pattern of letters that defines your grid:")
-
     grid = []
 
-    while (line := input("> ")) != '':
-        grid.append(line)
-        if len(line) != len(grid[0]):
-            print("Each row must have the same dimensions")
-            return
+    if args.file == None:
+        print("Put the files that you want to collage in the 'inputs' file.")
+        print("Give them all single letter names.")
+        print("If you type 'x', that space will be left blank.")
+        print("Write out the pattern of letters that defines your grid:")
+
+        while (line := input("> ")) != '':
+            grid.append(line)
+            if len(line) != len(grid[0]):
+                print("Each row must have the same dimensions")
+                return
+    else: 
+        pattern_file = open(args.file[0])
+        for line in pattern_file:
+            grid.append(line.strip())
+        
 
     if args.size == None:
         images, names = import_pics("./../inputs/", same_size=True)
     else:
         images, names = import_pics("./../inputs/", resize_param=True, new_size=args.size)
 
-    print(len(grid))
     if len(grid) == 0:
         return
 
@@ -124,7 +130,9 @@ def main():
     parser.add_argument("-s", "--size", type = int, nargs = 2,
                         metavar = ('height','width'), help = "The height and \
                         width of every image in the collage")
-
+    parser.add_argument("-f", "--file", type = str, nargs = 1,
+                        metavar = 'pattern_path', help = "A file containing \
+                        a multiple image collage pattern")
     args = parser.parse_args()
 
     if args.pattern == True:
@@ -136,10 +144,3 @@ def main():
 if __name__=="__main__":
     main()
 
-# aaabccccdd
-# aaabeeeedd
-# gfffgggggg
-# ggggggghhh
-# hhhhhhhhhh
-# hhhhhhhiii
-# iiiiiiiiii

@@ -134,3 +134,5 @@ dmypy.json
 *.gif
 *.png
 *.tga
+
+.DS_store
